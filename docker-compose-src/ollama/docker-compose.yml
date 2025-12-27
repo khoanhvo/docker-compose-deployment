@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  ollama:
+    # Sử dụng image chính thức của Ollama
+    image: ollama/ollama:latest
+    
+    # Đặt tên cho container để dễ quản lý
+    container_name: ollama
+    
+    # Mở cổng 11434 để truy cập API của Ollama
+    ports:
+      - "11434:11434"
+    
+    # Mount volume để lưu trữ models và dữ liệu
+    # Thư mục ./ollama trên host sẽ được ánh xạ tới /root/.ollama trong container
+    volumes:
+      - ./ollama:/root/.ollama
+    
+    # Tự động khởi động lại container nếu gặp lỗi
+    # unless-stopped: container sẽ tự động khởi động lại trừ khi bị dừng thủ công
+    restart: unless-stopped
+    
+    # Cấu hình healthcheck để kiểm tra trạng thái của service
+    healthcheck:
+      # Kiểm tra endpoint API để đảm bảo service đang hoạt động
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      # Khoảng thời gian giữa các lần kiểm tra
+      interval: 30s
+      # Thời gian chờ tối đa cho mỗi lần kiểm tra
+      timeout: 10s
+      # Số lần thử lại trước khi đánh dấu là unhealthy
+      retries: 3
+      # Thời gian chờ trước khi bắt đầu kiểm tra lần đầu tiên
+      start_period: 40s
